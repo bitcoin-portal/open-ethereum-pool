@@ -14,14 +14,13 @@ var Ether = math.BigPow(10, 18)
 var Shannon = math.BigPow(10, 9)
 
 var pow256 = math.BigPow(2, 256)
-var addressPattern = regexp.MustCompile("^0x[0-9a-fA-F]{40}$")
+var addressPattern = regexp.MustCompile("^[0-9a-zA-Z-_]{1,32}$")
 var zeroHash = regexp.MustCompile("^0?x?0+$")
 
 func IsValidHexAddress(s string) bool {
-	// BCom modification: Allow any string to be a username, instead of just hex addresses
-	/*if IsZeroHash(s) || !addressPattern.MatchString(s) {
+	if IsZeroHash(s) || !addressPattern.MatchString(s) {
 		return false
-	}*/
+	}
 	return true
 }
 
