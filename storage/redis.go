@@ -25,6 +25,7 @@ type RedisClient struct {
 }
 
 type BlockData struct {
+	Login	       string   `json:"login"`
 	Height         int64    `json:"height"`
 	Timestamp      int64    `json:"timestamp"`
 	Difficulty     int64    `json:"difficulty"`
@@ -63,7 +64,7 @@ func (b *BlockData) RoundKey() string {
 }
 
 func (b *BlockData) key() string {
-	return join(b.UncleHeight, b.Orphan, b.Nonce, b.serializeHash(), b.Timestamp, b.Difficulty, b.TotalShares, b.Reward)
+	return join(b.UncleHeight, b.Orphan, b.Nonce, b.serializeHash(), b.Timestamp, b.Difficulty, b.TotalShares, b.Reward, b.Login)
 }
 
 type Miner struct {
@@ -224,7 +225,7 @@ func (r *RedisClient) WriteBlock(login, id string, params []string, diff, roundD
 			totalShares += n
 		}
 		hashHex := strings.Join(params, ":")
-		s := join(hashHex, ts, roundDiff, totalShares)
+		s := join(hashHex, ts, roundDiff, totalShares, login)
 		cmd := r.client.ZAdd(r.formatKey("blocks", "candidates"), redis.Z{Score: float64(height), Member: s})
 		return false, cmd.Err()
 	}
@@ -832,6 +833,7 @@ func convertCandidateResults(raw *redis.ZSliceCmd) []*BlockData {
 		block.Timestamp, _ = strconv.ParseInt(fields[3], 10, 64)
 		block.Difficulty, _ = strconv.ParseInt(fields[4], 10, 64)
 		block.TotalShares, _ = strconv.ParseInt(fields[5], 10, 64)
+		block.Login = fields[6]
 		block.candidateKey = v.Member.(string)
 		result = append(result, &block)
 	}
